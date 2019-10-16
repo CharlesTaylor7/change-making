@@ -18,20 +18,7 @@ spec = do
       it "works" $ do
         sequenceA testCases
         pure ()
-    describe "Convolution" $ do
-      it "has a monoid instance which combines minimal solutions" $ do
-        sequenceA tests
-        pure ()
-    describe "merge" $ do
-      it "combines elements in a monoid; assumes the elements are commutative" $ do
-        let list = Sum <$> [1, 2, -3, 8, 102]
-        merge list `shouldBe` 110
-      it "works for strings; sorta" $ do
-        let list = ["My", "name", "is", "Inigo", "Montoya"]
-        merge list `shouldBe` ""
-      it " foo" $ do
-        let merged = mergeCoins coinsUSA
-        show merged `shouldBe` ""
+
 testCases :: [IO ()]
 testCases =
   [
@@ -53,43 +40,3 @@ testCases =
       makeChangeWith coinSet 63 `shouldBe` expected,
       pure ()
   ]
-
-toWeights :: Convolution -> Map Int Int
-toWeights (Convolution con) =
-  con
-  & M.toList
-  & map (bimap unMoney coinCount)
-  & M.fromList
-
-tests :: [IO ()]
-tests =
-  let
-    a = coinToConvolution $ Coin 1
-    b = coinToConvolution $ Coin 5
-    c = coinToConvolution $ Coin 4
-  in
-    [
-      let
-        result = toWeights $ a <> b
-        expected =
-            M.insert 0 0 .
-            M.insert 1 1 .
-            M.insert 5 1 .
-            M.insert 6 2 $
-            mempty
-      in
-        result `shouldBe` expected,
-      let
-        result = toWeights $ a <> b <> c
-        expected =
-          M.insert 0 0 .
-          M.insert 1 1 .
-          M.insert 4 1 .
-          M.insert 5 1 .
-          M.insert 6 2 .
-          M.insert 9 2 .
-          M.insert 10 3 $
-          mempty
-      in
-        result `shouldBe` expected
-    ]
