@@ -35,7 +35,6 @@ newtype Change = Change { unChange :: Map Coin Count }
 
 newtype Convolution = Convolution { unConvolution :: Map Money Change }
 
-
 -- eq & ord
 instance Eq Change where
   (==) = (==) `on` coinCount
@@ -99,8 +98,25 @@ coinToConvolution coin@(Coin c) =
   in
     Convolution $ (noCoin . withCoin) mempty
 
-merge :: [Coin] -> Convolution
-merge = foldMap coinToConvolution
+mergeCoins :: Currency -> Convolution
+mergeCoins = merge . map coinToConvolution . unCurrency
+
+merge :: forall a. Monoid a => [a] -> a
+merge xs = go xs $ length xs
+  where
+    go :: [a] -> Int -> a
+    go [] _ = mempty
+    go [x] _ = x
+    go xs n =
+      let
+        (q, r) = n `divMod` 2
+        (left, right@(h : rest)) = splitAt q xs
+      in
+        if r == 0
+        then
+          go (zipWith (<>) left right) q
+        else
+          go (h : zipWith (<>) left rest) (q + 1)
 
 --
 dollar = Coin 100

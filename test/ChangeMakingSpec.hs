@@ -7,6 +7,7 @@ import Test.Hspec
 import Data.Map (Map)
 import qualified Data.Map as M
 
+import Data.Monoid
 import Data.Traversable
 import Data.Bifunctor
 import Control.Lens ((&))
@@ -21,7 +22,16 @@ spec = do
       it "has a monoid instance which combines minimal solutions" $ do
         sequenceA tests
         pure ()
-
+    describe "merge" $ do
+      it "combines elements in a monoid; assumes the elements are commutative" $ do
+        let list = Sum <$> [1, 2, -3, 8, 102]
+        merge list `shouldBe` 110
+      it "works for strings; sorta" $ do
+        let list = ["My", "name", "is", "Inigo", "Montoya"]
+        merge list `shouldBe` ""
+      it " foo" $ do
+        let merged = mergeCoins coinsUSA
+        show merged `shouldBe` ""
 testCases :: [IO ()]
 testCases =
   [
