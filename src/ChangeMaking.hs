@@ -64,7 +64,7 @@ instance Semigroup SolutionSet where
     modify $ M.insertWith min money change
 
 instance Monoid SolutionSet where
-  mempty = SolutionSet [(Money 0, [])]
+  mempty = SolutionSet [(Money 0, Change [])]
 
 -- Show instances
 instance Show Change where
@@ -103,8 +103,6 @@ solve (Currency coins) money =
       & map (coinToMoney &&& coinToChange)
       & M.fromList
       & SolutionSet
-
-    initial = SolutionSet $
   in
     flip loop mempty \solutions ->
       case unSolutionSet solutions !? money of

@@ -29,7 +29,7 @@ testCases =
     makeChange 100 `shouldBe` [quarter, quarter, quarter, quarter],
     makeChange 73 `shouldBe` [quarter, quarter, dime, dime, penny, penny, penny],
     let
-      coinSet = Currency $ Coin <$> [50, 20, 15, 5, 1]
+      coinSet = Currency $ Coin <$> [50, 20, 15, 5, 4, 1]
       expected = Coin <$> [15, 4, 4]
     in
       makeChangeWith coinSet 23 `shouldBe` expected,
