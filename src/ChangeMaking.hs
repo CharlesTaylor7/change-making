@@ -39,27 +39,23 @@ newtype Change = Change { unChange :: [Coin] }
 
 newtype SolutionSet = SolutionSet { unSolutionSet :: Map Money Change }
 
--- instances
-instance Semigroup Money where
-  Money l <> Money r = Money (l + r)
+advanceSolutions :: Money -> Currency -> SolutionSet -> SolutionSet
+advanceSolutions (Money t) (Currency coins) (SolutionSet s) =
+  SolutionSet $
+  flip execState mempty $
+  for_ coins $ \(Coin coin) ->
+  for_ (Map.toList s) $ \(Money money, Change change) -> do
+  let total = coin + money
+  let money' = Money total
+  let change' = Change (Coin coin : change)
+  if total > t
+  then pure ()
+  else modify $ Map.insert money' change'
 
-instance Semigroup Change where
-  Change l <> Change r = Change (l ++ r)
-
-instance Semigroup SolutionSet where
-  SolutionSet l <> SolutionSet r =
-    SolutionSet $
-    flip execState mempty $
-    for_ (Map.toList l) $ \pairL ->
-    for_ (Map.toList r) $ \pairR -> do
-    let (money, change) = pairL <> pairR
-    modify $ Map.insert money change
-
-instance Monoid SolutionSet where
-  mempty =
-    SolutionSet $
-    Map.insert (Money 0) (Change []) $
-    Map.empty
+initialSolution =
+  SolutionSet $
+  Map.insert (Money 0) (Change []) $
+  Map.empty
 
 -- functions
 coinCount :: Change -> Int
@@ -78,7 +74,7 @@ loop :: (a -> Either a b) -> a -> b
 loop act x = act x & loop act ||| id
 
 solve :: Currency -> Money -> Change
-solve (Currency coins) money =
+solve currency@(Currency coins) money =
   let
     oneCoinSolutions =
       coins
@@ -86,10 +82,10 @@ solve (Currency coins) money =
       & Map.fromList
       & SolutionSet
   in
-    flip loop mempty $ \solutions ->
+    flip loop initialSolution $ \solutions ->
       case unSolutionSet solutions !? money of
         Just change -> Right change
-        Nothing -> Left $ oneCoinSolutions <> solutions
+        Nothing -> Left $ advanceSolutions money currency solutions
 
 makeChangeWith :: Currency -> Money -> [Coin]
 makeChangeWith = (unChange . ) . solve
