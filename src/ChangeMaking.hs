@@ -89,7 +89,7 @@ solve (Currency coins) money =
     flip loop mempty $ \solutions ->
       case unSolutionSet solutions !? money of
         Just change -> Right change
-        Nothing -> Left $ solutions <> oneCoinSolutions
+        Nothing -> Left $ oneCoinSolutions <> solutions
 
 makeChangeWith :: Currency -> Money -> [Coin]
 makeChangeWith = (unChange . ) . solve
