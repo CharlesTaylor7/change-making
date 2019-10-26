@@ -41,10 +41,10 @@ newtype SolutionSet = SolutionSet { unSolutionSet :: Map Money Change }
 
 -- instances
 instance Semigroup Money where
-  (Money l) <> (Money r) = Money (l + r)
+  Money l <> Money r = Money (l + r)
 
 instance Semigroup Change where
-  (Change l) <> (Change r) = Change (l ++ r)
+  Change l <> Change r = Change (l ++ r)
 
 instance Semigroup SolutionSet where
   SolutionSet l <> SolutionSet r =
