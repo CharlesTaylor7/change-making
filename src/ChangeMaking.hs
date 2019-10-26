@@ -1,62 +1,67 @@
-module ChangeMaking where
+module ChangeMaking
+  ( makeChange
+  , makeChangeWith
+  , penny
+  , nickel
+  , dime
+  , quarter
+  , Money(..)
+  , Coin(..)
+  , Currency(..)
+  ) where
 
 -- base
 import Control.Arrow ((|||), (&&&))
-import Control.Monad.State.Strict (execState, modify)
 
 import Data.Foldable (for_)
 import Data.Function (on, (&))
-import Data.Monoid(Sum(..),(<>))
 
 -- containers package
 import Data.Map (Map, (!?))
-import qualified Data.Map as M
+import qualified Data.Map as Map
+
+-- mtl package
+import Control.Monad.State.Strict (execState, modify)
 
 -- data types
 newtype Currency = Currency { unCurrency :: [Coin] }
 
 newtype Coin = Coin { unCoin :: Int }
-  deriving newtype (Eq, Ord)
+  deriving (Eq, Ord)
 
 newtype Money = Money { unMoney :: Int }
-  deriving newtype (Eq, Ord, Num)
+  deriving (Eq, Ord)
 
 newtype Count = Count { unCount :: Int }
-  deriving newtype (Num, Eq, Ord)
+  deriving (Eq, Ord)
 
 newtype Change = Change { unChange :: [Coin] }
 
 newtype SolutionSet = SolutionSet { unSolutionSet :: Map Money Change }
 
--- eq & ord
-instance Eq Change where
-  (==) = (==) `on` coinCount
+-- instances
+instance Semigroup Money where
+  (Money l) <> (Money r) = Money (l + r)
 
-instance Ord Change where
-  compare = compare `on` coinCount
-
--- Monoid instances
-deriving newtype instance Semigroup Change
-deriving newtype instance Monoid Change
-
-deriving via (Sum Int) instance Semigroup Count
-deriving via (Sum Int) instance Monoid Count
-
-deriving via (Sum Int) instance Semigroup Money
-deriving via (Sum Int) instance Monoid Money
+instance Semigroup Change where
+  (Change l) <> (Change r) = Change (l ++ r)
 
 instance Semigroup SolutionSet where
   SolutionSet l <> SolutionSet r =
     SolutionSet $
     flip execState mempty $
-    for_ (M.toList l) $ \pairL ->
-    for_ (M.toList r) $ \pairR -> do
+    for_ (Map.toList l) $ \pairL ->
+    for_ (Map.toList r) $ \pairR -> do
     let (money, change) = pairL <> pairR
-    modify $ M.insertWith min money change
+    modify $ Map.insert money change
 
 instance Monoid SolutionSet where
-  mempty = SolutionSet [(Money 0, Change [])]
+  mempty =
+    SolutionSet $
+    Map.insert (Money 0) (Change []) $
+    Map.empty
 
+-- functions
 coinCount :: Change -> Int
 coinCount = length . unChange
 
@@ -78,10 +83,10 @@ solve (Currency coins) money =
     oneCoinSolutions =
       coins
       & map (coinToMoney &&& coinToChange)
-      & M.fromList
+      & Map.fromList
       & SolutionSet
   in
-    flip loop mempty \solutions ->
+    flip loop mempty $ \solutions ->
       case unSolutionSet solutions !? money of
         Just change -> Right change
         Nothing -> Left $ solutions <> oneCoinSolutions
@@ -114,9 +119,8 @@ instance Show SolutionSet where
   show (SolutionSet conv) =
     let
       pairs =
-        M.toList conv
+        Map.toList conv
         & map (\(money, change) -> show money <> ": " <> show (coinCount change) <> " coins")
         & unlines
     in
       pairs
---

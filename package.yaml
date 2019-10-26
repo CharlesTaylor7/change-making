@@ -24,15 +24,6 @@ dependencies:
 - containers
 - mtl
 
-default-extensions:
-- GeneralizedNewtypeDeriving
-- StandaloneDeriving
-- DerivingVia
-- MonoLocalBinds
-- OverloadedLists
-- StrictData
-- BlockArguments
-
 library:
   source-dirs: src
 
@@ -58,4 +49,3 @@ tests:
     dependencies:
     - change-making
     - hspec
-    - QuickCheck
