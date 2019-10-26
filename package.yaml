@@ -22,24 +22,13 @@ description:         Please see the README on GitHub at <https://github.com/Char
 dependencies:
 - base >= 4.7 && < 5
 - containers
-- lens
 - mtl
-- random
-- vector
-- either
 
 default-extensions:
-- ViewPatterns
-- AllowAmbiguousTypes
-- TypeApplications
 - GeneralizedNewtypeDeriving
 - StandaloneDeriving
 - DerivingVia
-- PartialTypeSignatures
 - MonoLocalBinds
-- TupleSections
-- ScopedTypeVariables
-- RankNTypes
 - OverloadedLists
 - StrictData
 - BlockArguments

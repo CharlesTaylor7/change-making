@@ -1,25 +1,16 @@
-
 module ChangeMaking where
 
-import Data.Bifunctor
-import Data.Foldable
-import Data.Function
-import Data.List
-import Data.Monoid
-import Data.Ord
-import Data.Traversable
-import Data.Typeable
-
-import Debug.Trace
-
+-- base
 import Control.Arrow ((|||), (&&&))
-import Control.Monad.State.Strict
+import Control.Monad.State.Strict (execState, modify)
 
--- containers
+import Data.Foldable (for_)
+import Data.Function (on, (&))
+import Data.Monoid(Sum(..),(<>))
+
+-- containers package
 import Data.Map (Map, (!?))
 import qualified Data.Map as M
-
-import ChangeMaking.Utils
 
 -- data types
 newtype Currency = Currency { unCurrency :: [Coin] }
@@ -66,26 +57,6 @@ instance Semigroup SolutionSet where
 instance Monoid SolutionSet where
   mempty = SolutionSet [(Money 0, Change [])]
 
--- Show instances
-instance Show Change where
-  show = show . coinCount
-
-instance Show Coin where
-  show (Coin c) = show c <> "-coin"
-
-instance Show Money where
-  show (Money m) = show m <> "¢"
-
-instance Show SolutionSet where
-  show (SolutionSet conv) =
-    let
-      pairs =
-        M.toList conv
-        & map (\(money, change) -> show money <> ": " <> show (coinCount change) <> " coins")
-        & unlines
-    in
-      pairs
-
 coinCount :: Change -> Int
 coinCount = length . unChange
 
@@ -94,6 +65,12 @@ coinToChange = Change . pure
 
 coinToMoney :: Coin -> Money
 coinToMoney = Money . unCoin
+
+-- A functional while loop
+-- A `Left a` value tells the loop to continue with `a` as the next argument to `act`.
+-- A `Right b`  value signals to exit the loop with b as the result.
+loop :: (a -> Either a b) -> a -> b
+loop act x = act x & loop act ||| id
 
 solve :: Currency -> Money -> Change
 solve (Currency coins) money =
@@ -122,3 +99,24 @@ nickel = Coin 5
 penny = Coin 1
 
 coinsUSA = Currency [ quarter, dime, nickel, penny]
+
+-- Show instances, purely for debugging
+instance Show Change where
+  show = show . coinCount
+
+instance Show Coin where
+  show (Coin c) = show c <> "-coin"
+
+instance Show Money where
+  show (Money m) = show m <> "¢"
+
+instance Show SolutionSet where
+  show (SolutionSet conv) =
+    let
+      pairs =
+        M.toList conv
+        & map (\(money, change) -> show money <> ": " <> show (coinCount change) <> " coins")
+        & unlines
+    in
+      pairs
+--

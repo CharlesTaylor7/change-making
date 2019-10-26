@@ -1,16 +1,14 @@
 module ChangeMakingSpec where
 
-import ChangeMaking
-import Test.QuickCheck
-import Test.Hspec
+import Data.Function ((&))
 
 import Data.Map (Map)
 import qualified Data.Map as M
 
-import Data.Monoid
-import Data.Traversable
-import Data.Bifunctor
-import Control.Lens ((&))
+import Test.QuickCheck
+import Test.Hspec
+
+import ChangeMaking
 
 spec = do
   describe "ChangeMaking" $ do
