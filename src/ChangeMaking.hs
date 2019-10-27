@@ -15,6 +15,8 @@ import Control.Arrow ((|||), (&&&))
 
 import Data.Foldable (for_)
 import Data.Function (on, (&))
+import Data.List (sortOn)
+import Data.Ord (Down(..))
 
 -- containers package
 import Data.Map (Map, (!?))
@@ -74,8 +76,9 @@ loop :: (a -> Either a b) -> a -> b
 loop act x = act x & loop act ||| id
 
 solve :: Currency -> Money -> Change
-solve currency@(Currency coins) money =
+solve (Currency coins) money =
   let
+    ordered = Currency (coins & sortOn Down)
     oneCoinSolutions =
       coins
       & map (coinToMoney &&& coinToChange)
@@ -85,7 +88,7 @@ solve currency@(Currency coins) money =
     flip loop initialSolution $ \solutions ->
       case unSolutionSet solutions !? money of
         Just change -> Right change
-        Nothing -> Left $ advanceSolutions money currency solutions
+        Nothing -> Left $ advanceSolutions money ordered solutions
 
 makeChangeWith :: Currency -> Money -> [Coin]
 makeChangeWith = (unChange . ) . solve
