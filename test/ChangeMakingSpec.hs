@@ -5,8 +5,6 @@ import Test.Hspec
 import ChangeMaking.Types
 import ChangeMaking.Algorithm.BFS
 
-
-
 spec = do
   describe "ChangeMaking" $ do
     describe "makeChange: uses standard usa coins" $ do

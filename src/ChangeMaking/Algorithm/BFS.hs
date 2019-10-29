@@ -6,7 +6,7 @@ module ChangeMaking.Algorithm.BFS
 import Control.Arrow ((|||), (&&&))
 import Data.Foldable (for_)
 import Data.Function (on, (&))
-import Data.List (sortOn)
+import Data.List (sortOn, sort)
 import Data.Ord (Down(..))
 
 -- containers
@@ -59,7 +59,7 @@ loop act x = act x & loop act ||| id
 solve :: Currency -> Money -> Change
 solve (Currency coins) money =
   let
-    ordered = Currency (coins & sortOn Down)
+    ordered = Currency (coins & sort)
     oneCoinSolutions =
       coins
       & map (coinToMoney &&& coinToChange)
