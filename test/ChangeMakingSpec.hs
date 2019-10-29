@@ -2,7 +2,10 @@ module ChangeMakingSpec where
 
 import Test.Hspec
 
-import ChangeMaking
+import ChangeMaking.Types
+import ChangeMaking.Algorithm.BFS
+
+
 
 spec = do
   describe "ChangeMaking" $ do
@@ -29,3 +32,13 @@ spec = do
         let coinSet = Currency $ Coin <$> [1, 5, 10, 21, 25]
         let expected = Coin <$> [21, 21, 21]
         makeChangeWith coinSet (Money 63) `shouldBe` expected
+
+-- helper
+makeChange :: Money -> [Coin]
+makeChange = makeChangeWith coinsUSA
+
+coinsUSA = Currency [ quarter, dime, nickel, penny]
+quarter = Coin 25
+dime = Coin 10
+nickel = Coin 5
+penny = Coin 1

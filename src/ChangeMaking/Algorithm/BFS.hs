@@ -1,41 +1,23 @@
-module ChangeMaking
-  ( makeChange
-  , makeChangeWith
-  , penny
-  , nickel
-  , dime
-  , quarter
-  , Money(..)
-  , Coin(..)
-  , Currency(..)
+module ChangeMaking.Algorithm.BFS
+  ( makeChangeWith
   ) where
 
 -- base
 import Control.Arrow ((|||), (&&&))
-
 import Data.Foldable (for_)
 import Data.Function (on, (&))
 import Data.List (sortOn)
 import Data.Ord (Down(..))
 
--- containers package
+-- containers
 import Data.Map (Map, (!?))
 import qualified Data.Map as Map
 
--- mtl package
+-- mtl
 import Control.Monad.State.Strict (execState, modify)
 
--- data types
-newtype Currency = Currency { unCurrency :: [Coin] }
-
-newtype Coin = Coin { unCoin :: Int }
-  deriving (Eq, Ord)
-
-newtype Money = Money { unMoney :: Int }
-  deriving (Eq, Ord)
-
-newtype Count = Count { unCount :: Int }
-  deriving (Eq, Ord)
+-- change-making
+import ChangeMaking.Types
 
 newtype Change = Change { unChange :: [Coin] }
 
@@ -59,7 +41,6 @@ initialSolution =
   Map.insert (Money 0) (Change []) $
   Map.empty
 
--- functions
 coinCount :: Change -> Int
 coinCount = length . unChange
 
@@ -69,7 +50,7 @@ coinToChange = Change . pure
 coinToMoney :: Coin -> Money
 coinToMoney = Money . unCoin
 
--- A functional while loop
+-- |A functional while loop
 -- A `Left a` value tells the loop to continue with `a` as the next argument to `act`.
 -- A `Right b`  value signals to exit the loop with b as the result.
 loop :: (a -> Either a b) -> a -> b
@@ -92,17 +73,6 @@ solve (Currency coins) money =
 
 makeChangeWith :: Currency -> Money -> [Coin]
 makeChangeWith = (unChange . ) . solve
-
-makeChange :: Money -> [Coin]
-makeChange = makeChangeWith coinsUSA
-
-dollar = Coin 100
-quarter = Coin 25
-dime = Coin 10
-nickel = Coin 5
-penny = Coin 1
-
-coinsUSA = Currency [ quarter, dime, nickel, penny]
 
 -- Show instances, purely for debugging
 instance Show Change where
